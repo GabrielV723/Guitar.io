@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chord Log &amp; Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12191A;
+    --card: #1A2223;
+    --card-hover: #202A2B;
+    --line: #3E4B49;
+    --line-soft: #303B39;
+    --bone: #E3E9E5;
+    --bone-dim: #A2B0AA;
+    --patina: #6C7C77;
+    --copper: #6FA487;
+    --copper-bright: #8DC2A0;
+    --sage: #7FA396;
+    --sage-dim: #5F8172;
+    --danger: #B06555;
+    --deep-red: #7A2B26;
+    --deep-red-bright: #96382F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 8%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 96px);
+    color: var(--bone);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 36px;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+  }
+
+  .sub { color: var(--bone-dim); font-size: 15px; line-height: 1.5; max-width: 440px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin: 28px 0 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--patina);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 4px;
+    margin-right: 24px;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+  }
+  .tab-btn.active { color: var(--bone); border-bottom: 2px solid var(--copper); }
+  .tab-btn:hover { color: var(--bone); }
+  .tab-btn:focus-visible { outline: 2px solid var(--copper); outline-offset: 2px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .string-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line) 15%, var(--line) 85%, transparent);
+    position: relative;
+    margin: 26px 0;
+  }
+  .string-divider::after {
+    content: '';
+    position: absolute;
+    left: 50%; top: -3px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--copper);
+    opacity: 0.7;
+  }
+
+  /* Forms */
+  .card-form {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .row:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--patina);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  input[type="text"], input[type="date"], textarea, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--bone);
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus { border-color: var(--copper); }
+  input::-webkit-calendar-picker-indicator { filter: invert(0.8) sepia(0.4) saturate(2) hue-rotate(80deg); cursor: pointer; }
+
+  #chordName { font-family: 'Space Mono', monospace; font-size: 17px; font-weight: 700; }
+  .field-chord { flex: 0 0 160px; }
+  .field-status { flex: 0 0 150px; }
+  .field-note, .field-date { flex: 1; }
+
+  textarea { resize: vertical; min-height: 44px; font-family: 'Inter', sans-serif; line-height: 1.4; }
+
+  select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%236C7C77'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--copper); color: #12191A; }
+  .btn-primary:hover { background: var(--copper-bright); }
+  .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--bone-dim); }
+  .btn-ghost:hover { border-color: var(--copper); color: var(--bone); }
+  .btn:focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
+
+  .form-actions { display: flex; gap: 10px; margin-top: 4px; }
+
+  .editing-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(111,164,135,0.1);
+    border: 1px solid rgba(111,164,135,0.3);
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--copper-bright);
+  }
+  .editing-banner.show { display: flex; }
+  .editing-banner button { background: none; border: none; color: var(--bone-dim); cursor: pointer; font-size: 12px; text-decoration: underline; }
+
+  /* Fretboard builder */
+  .fb-section-label {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--patina); font-weight: 600; margin-bottom: 10px;
+  }
+  .fb-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .fb-stepper { display: flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 13px; color: var(--bone-dim); }
+  .fb-stepper button {
+    width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--line);
+    background: var(--bg); color: var(--bone); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .fb-stepper button:hover { border-color: var(--copper); }
+  .fb-hint { font-size: 12px; color: var(--patina); margin-top: 10px; line-height: 1.5; }
+
+  .fb-wrap { width: 260px; margin: 0 auto; user-select: none; }
+  .fb-markers-row { display: grid; grid-template-columns: repeat(6, 1fr); margin-bottom: 6px; }
+  .fb-marker-btn {
+    background: none; border: none; cursor: pointer; color: var(--bone-dim);
+    font-family: 'Space Mono', monospace; font-size: 15px; font-weight: 700;
+    height: 26px; display: flex; align-items: center; justify-content: center;
+  }
+  .fb-marker-btn:hover { color: var(--copper); }
+  .fb-marker-btn.is-open { color: var(--bone); }
+  .fb-marker-btn.is-muted { color: var(--copper); }
+
+  .fb-nut { height: 4px; background: var(--bone); border-radius: 1px; }
+  .fb-nut.thin { height: 1px; background: var(--line); margin: 4px 0; }
+  .fb-basefret-label { font-size: 10px; color: var(--copper); font-family: 'Space Mono', monospace; text-align: left; margin: 2px 0 0 2px; }
+
+  .fb-grid { position: relative; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .fb-fret-line { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); }
+  .fb-string-line { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+  .fb-cell-btn {
+    position: absolute; width: 34px; height: 34px; margin-left: -17px; margin-top: -17px;
+    border-radius: 50%; border: none; background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--bg); font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px;
+  }
+  .fb-cell-btn.filled { background: var(--copper); border: 1.5px solid var(--copper-bright); }
+  .fb-cell-btn:not(.filled):hover { background: rgba(111,164,135,0.18); }
+  .fb-cell-btn:not([disabled]) { pointer-events: auto; }
+
+  .fb-string-labels { display: grid; grid-template-columns: repeat(6, 1fr); margin-top: 6px; }
+  .fb-string-labels span { text-align: center; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--patina); }
+
+  /* static mini fretboard shown in cards */
+  .fb-mini { width: 132px; flex-shrink: 0; }
+  .fb-mini .fb-markers-row { margin-bottom: 4px; }
+  .fb-mini .fb-marker-btn { height: 16px; font-size: 11px; cursor: default; pointer-events: none; }
+  .fb-mini .fb-cell-btn { width: 20px; height: 20px; margin-left: -10px; margin-top: -10px; font-size: 9px; cursor: default; pointer-events: none; }
+  .fb-mini .fb-string-labels span { font-size: 8px; }
+
+  .search-bar { margin: 22px 0 16px; }
+  .search-bar input { font-family: 'Space Mono', monospace; font-size: 13px; }
+
+  .count { font-size: 12px; color: var(--patina); font-family: 'Space Mono', monospace; margin-bottom: 14px; }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: background 0.15s ease;
+  }
+  .card:hover { background: var(--card-hover); }
+
+  .card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .chord-name { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; color: var(--bone); }
+  .card-actions { display: flex; align-items: center; gap: 8px; }
+
+  .status-pill {
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px; cursor: pointer; border: 1px solid transparent; user-select: none;
+    transition: opacity 0.15s ease;
+  }
+  .status-pill:hover { opacity: 0.85; }
+  .status-new { background: rgba(111,164,135,0.15); color: var(--copper-bright); border-color: rgba(111,164,135,0.3); }
+  .status-practicing { background: rgba(127,163,150,0.15); color: var(--sage); border-color: rgba(127,163,150,0.3); }
+  .status-learned { background: rgba(162,176,170,0.12); color: var(--bone-dim); border-color: rgba(162,176,170,0.25); }
+
+  .icon-btn {
+    background: none; border: none; color: var(--patina); cursor: pointer; padding: 4px;
+    font-size: 15px; line-height: 1; transition: color 0.15s ease;
+  }
+  .icon-btn:hover { color: var(--bone); }
+  .icon-btn.danger:hover { color: var(--danger); }
+
+  .card-body { display: flex; gap: 16px; margin-top: 12px; align-items: flex-start; }
+  .note-text { font-size: 14px; line-height: 1.55; color: var(--bone-dim); white-space: pre-wrap; flex: 1; }
+  .note-text.empty { color: var(--patina); font-style: italic; }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--patina); }
+  .empty-state .glyph { font-family: 'Space Mono', monospace; font-size: 24px; color: var(--line); margin-bottom: 10px; }
+  .loading { text-align: center; padding: 40px; color: var(--patina); font-family: 'Space Mono', monospace; font-size: 13px; }
+
+  /* practice log */
+  .practice-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px;
+  }
+  .practice-date {
+    font-family: 'Space Mono', monospace; font-size: 13px; color: var(--copper-bright);
+    letter-spacing: 0.03em; margin-bottom: 6px;
+  }
+  .practice-text { font-size: 14px; line-height: 1.55; color: var(--bone-dim); white-space: pre-wrap; }
+  .practice-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+
+  /* 1 minute changes */
+  .omc-stage {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 32px 20px;
+    text-align: center;
+  }
+  .omc-instructions { color: var(--bone-dim); font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 22px; }
+  .omc-phase-label {
+    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--patina); margin-bottom: 14px;
+  }
+  .omc-phase-label.is-live { color: var(--copper-bright); }
+  .omc-big-timer {
+    font-family: 'Space Mono', monospace; font-weight: 700; font-size: 64px;
+    letter-spacing: -0.02em; color: var(--bone); margin-bottom: 20px; line-height: 1;
+  }
+  .omc-big-timer.is-urgent { color: var(--deep-red-bright); }
+  .btn-start {
+    background: var(--deep-red);
+    color: #F7ECE9;
+    border: none;
+    border-radius: 8px;
+    padding: 16px 48px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-start:hover { background: var(--deep-red-bright); }
+  .btn-start:focus-visible { outline: 2px solid var(--bone); outline-offset: 2px; }
+  .omc-cancel-btn { margin-top: 6px; }
+  .omc-entry { text-align: left; }
+  .omc-entry .omc-phase-label { text-align: center; }
+  .omc-entry .form-actions { justify-content: center; }
+  .omc-field-error { border-color: var(--danger) !important; }
+
+  .omc-lb-row {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: background 0.15s ease;
+  }
+  .omc-lb-row-top {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; cursor: pointer; user-select: none;
+  }
+  .omc-lb-row-top:hover { background: var(--card-hover); }
+  .omc-lb-rank {
+    font-family: 'Space Mono', monospace; font-size: 13px; color: var(--patina);
+    width: 22px; flex-shrink: 0;
+  }
+  .omc-lb-chord { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 16px; flex: 1; min-width: 0; }
+  .omc-lb-best { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; color: var(--copper-bright); text-align: right; white-space: nowrap; }
+  .omc-lb-best-label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--patina); margin-left: 4px; }
+  .omc-lb-count { font-size: 11px; color: var(--patina); white-space: nowrap; flex-shrink: 0; }
+  .omc-lb-chevron { color: var(--patina); font-size: 12px; transition: transform 0.15s ease; flex-shrink: 0; }
+  .omc-lb-row.open .omc-lb-chevron { transform: rotate(180deg); }
+  .omc-lb-detail { display: none; border-top: 1px solid var(--line); padding: 4px 16px 10px; }
+  .omc-lb-row.open .omc-lb-detail { display: block; }
+  .omc-attempt {
+    display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--line-soft); font-size: 13px;
+  }
+  .omc-attempt:last-child { border-bottom: none; }
+  .omc-attempt-date { color: var(--bone-dim); flex: 1; }
+  .omc-attempt-changes { font-family: 'Space Mono', monospace; font-weight: 700; color: var(--bone); }
+  .omc-pb-tag {
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.05em;
+    background: rgba(111,164,135,0.15); color: var(--copper-bright); border: 1px solid rgba(111,164,135,0.3);
+    padding: 2px 6px; border-radius: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .row { flex-direction: column; }
+    .field-chord, .field-status { flex: none; }
+    h1 { font-size: 28px; }
+    .card-body { flex-direction: column; }
+    .fb-mini { width: 100%; max-width: 180px; }
+    .omc-big-timer { font-size: 48px; }
+    .omc-lb-row-top { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Practice notebook</div>
+    <h1>Chord Log &amp; Practice</h1>
+    <div class="sub">Track the chords you're learning, sketch the fingering, and log what you practiced each day.</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="chords">Chords</button>
+    <button class="tab-btn" data-tab="practice">Practice Log</button>
+    <button class="tab-btn" data-tab="oneminute">1 Minute Changes</button>
+    <button class="tab-btn" data-tab="perfect">Perfect Changes</button>
+  </div>
+
+  <!-- CHORDS PANEL -->
+  <div class="panel active" id="panel-chords">
+    <div class="editing-banner" id="editingBanner">
+      <span>Editing "<span id="editingChordLabel"></span>"</span>
+      <button id="cancelEditBtn" type="button">Cancel</button>
+    </div>
+
+    <form class="card-form" id="addForm">
+      <div class="row">
+        <div class="field-chord">
+          <label for="chordName">Chord</label>
+          <input type="text" id="chordName" placeholder="Cmaj7" maxlength="40" autocomplete="off" required>
+        </div>
+        <div class="field-status">
+          <label for="chordStatus">Status</label>
+          <select id="chordStatus">
+            <option value="new">New</option>
+            <option value="practicing">Practicing</option>
+            <option value="learned">Learned</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field-note">
+          <label for="chordNote">Note (optional)</label>
+          <textarea id="chordNote" placeholder="e.g. barre on the 3rd fret, watch the pinky..." rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="string-divider"></div>
+
+      <div class="fb-section-label">Tab — click a string/fret to place a finger</div>
+      <div class="fb-controls">
+        <div class="fb-stepper">
+          <span>Starting fret</span>
+          <button type="button" id="fbBaseDec">−</button>
+          <span id="fbBaseFretLabel">1</span>
+          <button type="button" id="fbBaseInc">+</button>
+        </div>
+        <button type="button" class="btn btn-ghost" id="fbClearBtn" style="padding:6px 12px; font-size:12px;">Clear tab</button>
+      </div>
+      <div id="fbBuilder"></div>
+      <div class="fb-hint">Click a fret to place your next finger (cycles 1 → 2 → 3 → 4 → clear). Click X/O above the nut to mark a string muted or open.</div>
+
+      <div class="string-divider"></div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="saveChordBtn">Add chord</button>
+      </div>
+    </form>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Filter by chord name...">
+    </div>
+    <div class="count" id="countLabel"></div>
+    <div class="list" id="chordList"></div>
+  </div>
+
+  <!-- PRACTICE PANEL -->
+  <div class="panel" id="panel-practice">
+    <form class="card-form" id="practiceForm">
+      <div class="row">
+        <div class="field-date" style="flex: 0 0 180px;">
+          <label for="practiceDate">Date</label>
+          <input type="date" id="practiceDate" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field-note">
+          <label for="practiceText">What did you practice?</label>
+          <textarea id="practiceText" placeholder="e.g. A to D transitions, strumming pattern, new song intro..." rows="3" required></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" id="logPracticeBtn">Log practice</button>
+      </div>
+    </form>
+
+    <div class="string-divider"></div>
+
+    <div class="count" id="practiceCountLabel"></div>
+    <div class="list" id="practiceList"></div>
+  </div>
+
+  <!-- 1 MINUTE CHANGES PANEL -->
+  <div class="panel" id="panel-oneminute">
+    <div class="omc-stage" id="omcStage">
+      <!-- idle -->
+      <div id="omcIdle">
+        <div class="omc-instructions">Pick your chord pair, press Start, and get in position during the 5 second countdown. Then change between the chords as many times as you can in 1 minute.</div>
+        <button type="button" class="btn-start" id="omcStartBtn">Start</button>
+      </div>
+
+      <!-- countdown -->
+      <div id="omcCountdown" style="display:none;">
+        <div class="omc-phase-label">Get ready</div>
+        <div class="omc-big-timer" id="omcCountdownNum">5</div>
+        <button type="button" class="btn btn-ghost omc-cancel-btn" id="omcCancelBtn1">Cancel</button>
+      </div>
+
+      <!-- running -->
+      <div id="omcRunning" style="display:none;">
+        <div class="omc-phase-label is-live">Go — change chords!</div>
+        <div class="omc-big-timer" id="omcRunningNum">1:00</div>
+        <button type="button" class="btn btn-ghost omc-cancel-btn" id="omcCancelBtn2">Cancel</button>
+      </div>
+
+      <!-- entry form -->
+      <div class="omc-entry" id="omcEntry" style="display:none;">
+        <div class="omc-phase-label">Time's up — log this set</div>
+        <div class="row">
+          <div class="field-note">
+            <label for="omcChords">Chords</label>
+            <input type="text" id="omcChords" placeholder="D,A" autocomplete="off">
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1;">
+            <label for="omcChanges">Changes</label>
+            <input type="text" id="omcChanges" inputmode="numeric" placeholder="24" autocomplete="off">
+          </div>
+          <div style="flex:1;">
+            <label for="omcDate">Date</label>
+            <input type="date" id="omcDate">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="omcSaveBtn">Save entry</button>
+          <button type="button" class="btn btn-ghost" id="omcDiscardBtn">Discard</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="string-divider"></div>
+
+    <div class="fb-section-label">Leaderboard</div>
+    <div class="count" id="omcLeaderboardCount"></div>
+    <div class="list" id="omcLeaderboard"></div>
+  </div>
+
+  <!-- PERFECT CHANGES PANEL -->
+  <div class="panel" id="panel-perfect">
+    <div class="omc-stage" id="pcStage">
+      <!-- idle -->
+      <div id="pcIdle">
+        <div class="omc-instructions">Pick your chord pair, press Start, and get in position during the 5 second countdown. Then perform as many perfect chord changes as you can in 1 minute.</div>
+        <button type="button" class="btn-start" id="pcStartBtn">Start</button>
+      </div>
+
+      <!-- countdown -->
+      <div id="pcCountdown" style="display:none;">
+        <div class="omc-phase-label">Get ready</div>
+        <div class="omc-big-timer" id="pcCountdownNum">5</div>
+        <button type="button" class="btn btn-ghost omc-cancel-btn" id="pcCancelBtn1">Cancel</button>
+      </div>
+
+      <!-- running -->
+      <div id="pcRunning" style="display:none;">
+        <div class="omc-phase-label is-live">Go — perfect changes only!</div>
+        <div class="omc-big-timer" id="pcRunningNum">1:00</div>
+        <button type="button" class="btn btn-ghost omc-cancel-btn" id="pcCancelBtn2">Cancel</button>
+      </div>
+
+      <!-- entry form -->
+      <div class="omc-entry" id="pcEntry" style="display:none;">
+        <div class="omc-phase-label">Time's up — log this set</div>
+        <div class="row">
+          <div class="field-note">
+            <label for="pcChords">Chords</label>
+            <input type="text" id="pcChords" placeholder="D,A" autocomplete="off">
+          </div>
+        </div>
+        <div class="row">
+          <div style="flex:1;">
+            <label for="pcChanges">Changes</label>
+            <input type="text" id="pcChanges" inputmode="numeric" placeholder="24" autocomplete="off">
+          </div>
+          <div style="flex:1;">
+            <label for="pcDate">Date</label>
+            <input type="date" id="pcDate">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="pcSaveBtn">Save entry</button>
+          <button type="button" class="btn btn-ghost" id="pcDiscardBtn">Discard</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="string-divider"></div>
+
+    <div class="fb-section-label">Leaderboard</div>
+    <div class="count" id="pcLeaderboardCount"></div>
+    <div class="list" id="pcLeaderboard"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const CHORDS_KEY = 'chords-log';
+  const PRACTICE_KEY = 'practice-log';
+  const OMC_KEY = 'one-minute-changes-log';
+  const PC_KEY = 'perfect-changes-log';
+  const STRING_LABELS = ['E','A','D','G','B','e'];
+  const FB_ROWS = 5;
+  const FB_WIDTH = 260;
+  const FB_ROW_HEIGHT = 42;
+
+  let chords = [];
+  let practiceEntries = [];
+  let editingChordId = null;
+  let omcAttempts = [];
+  let omcOpenKeys = new Set();
+  let omcCountdownTimer = null;
+  let omcRunningTimer = null;
+  let omcCountdownRemaining = 5;
+  let omcRunningRemaining = 60;
+  let pcAttempts = [];
+  let pcOpenKeys = new Set();
+  let pcCountdownTimer = null;
+  let pcRunningTimer = null;
+  let pcCountdownRemaining = 5;
+  let pcRunningRemaining = 60;
+
+  // builder state
+  let fb = { frets: [0,0,0,0,0,0], fingers: {}, baseFret: 1 };
+
+  /* ---------- utils ---------- */
+  function uid(prefix) { return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
+  function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str == null ? '' : str; return d.innerHTML; }
+  function stringX(i) { return (FB_WIDTH / 5) * i; }
+
+  /* ---------- storage ----------
+     Data lives server-side in a Redis (Upstash) database, via the
+     /api/storage serverless function — not in any one browser. That means
+     it's the same no matter which device or browser you open this site
+     from. storageGet/storageSet work with plain JS values (arrays/objects)
+     directly; the API route handles talking to the database. */
+  async function storageGet(key) {
+    try {
+      const res = await fetch('/api/storage?key=' + encodeURIComponent(key));
+      if (!res.ok) { console.error('Storage read failed:', res.status); return null; }
+      const data = await res.json();
+      return data.value === undefined ? null : data.value;
+    } catch (e) { console.error('Storage read failed', e); return null; }
+  }
+
+  async function storageSet(key, value) {
+    try {
+      const res = await fetch('/api/storage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value })
+      });
+      if (!res.ok) { console.error('Storage write failed:', res.status); return false; }
+      return true;
+    } catch (e) { console.error('Storage write failed', e); return false; }
+  }
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------- fretboard builder rendering ---------- */
+  function renderFretboard(container, state, opts) {
+    opts = opts || {};
+    const interactive = !!opts.interactive;
+    const mini = !!opts.mini;
+    const rows = FB_ROWS;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'fb-wrap' + (mini ? ' fb-mini' : '');
+    if (mini) wrap.style.width = '132px';
+
+    // markers row (X / O / blank)
+    const markersRow = document.createElement('div');
+    markersRow.className = 'fb-markers-row';
+    for (let i = 0; i < 6; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fb-marker-btn';
+      const val = state.frets[i];
+      if (val === 'x') { btn.textContent = '×'; btn.classList.add('is-muted'); }
+      else if (val === 0) { btn.textContent = 'O'; btn.classList.add('is-open'); }
+      else { btn.textContent = ''; }
+      if (interactive) {
+        btn.addEventListener('click', () => {
+          state.frets[i] = (state.frets[i] === 'x') ? 0 : 'x';
+          delete state.fingers[i];
+          rerenderBuilder();
+        });
+      } else {
+        btn.disabled = true;
+      }
+      markersRow.appendChild(btn);
+    }
+    wrap.appendChild(markersRow);
+
+    // nut / base fret label
+    if (state.baseFret === 1) {
+      const nut = document.createElement('div');
+      nut.className = 'fb-nut';
+      wrap.appendChild(nut);
+    } else {
+      const nut = document.createElement('div');
+      nut.className = 'fb-nut thin';
+      wrap.appendChild(nut);
+      const label = document.createElement('div');
+      label.className = 'fb-basefret-label';
+      label.textContent = state.baseFret + 'fr';
+      wrap.appendChild(label);
+    }
+
+    // grid
+    const gridHeight = rows * (mini ? 24 : FB_ROW_HEIGHT);
+    const rowH = mini ? 24 : FB_ROW_HEIGHT;
+    const width = mini ? 132 : FB_WIDTH;
+    const grid = document.createElement('div');
+    grid.className = 'fb-grid';
+    grid.style.height = gridHeight + 'px';
+    grid.style.width = width + 'px';
+
+    // fret lines
+    for (let r = 0; r <= rows; r++) {
+      const line = document.createElement('div');
+      line.className = 'fb-fret-line';
+      line.style.top = (r * rowH) + 'px';
+      grid.appendChild(line);
+    }
+    // string lines
+    for (let i = 0; i < 6; i++) {
+      const line = document.createElement('div');
+      line.className = 'fb-string-line';
+      line.style.left = ((width / 5) * i) + 'px';
+      grid.appendChild(line);
+    }
+    // cell buttons / dots
+    for (let i = 0; i < 6; i++) {
+      for (let r = 0; r < rows; r++) {
+        const absoluteFret = state.baseFret + r;
+        const isFilled = (typeof state.frets[i] === 'number' && state.frets[i] !== 0 && state.frets[i] === absoluteFret);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'fb-cell-btn' + (isFilled ? ' filled' : '');
+        const x = (width / 5) * i;
+        const y = r * rowH + rowH / 2;
+        btn.style.left = x + 'px';
+        btn.style.top = y + 'px';
+        if (mini) { btn.style.width = '20px'; btn.style.height = '20px'; btn.style.marginLeft = '-10px'; btn.style.marginTop = '-10px'; btn.style.fontSize = '9px'; }
+        if (isFilled && state.fingers[i]) btn.textContent = state.fingers[i];
+        if (interactive) {
+          btn.addEventListener('click', () => {
+            const already = (state.frets[i] === absoluteFret);
+            if (already) {
+              const cur = state.fingers[i] || 0;
+              if (cur >= 4) { state.frets[i] = 0; delete state.fingers[i]; }
+              else { state.fingers[i] = cur + 1; }
+            } else {
+              state.frets[i] = absoluteFret;
+              state.fingers[i] = 1;
+            }
+            rerenderBuilder();
+          });
+        } else {
+          btn.disabled = true;
+        }
+        grid.appendChild(btn);
+      }
+    }
+    wrap.appendChild(grid);
+
+    // string labels
+    const labels = document.createElement('div');
+    labels.className = 'fb-string-labels';
+    STRING_LABELS.forEach(l => {
+      const span = document.createElement('span');
+      span.textContent = l;
+      labels.appendChild(span);
+    });
+    wrap.appendChild(labels);
+
+    container.innerHTML = '';
+    container.appendChild(wrap);
+  }
+
+  function rerenderBuilder() {
+    document.getElementById('fbBaseFretLabel').textContent = fb.baseFret;
+    renderFretboard(document.getElementById('fbBuilder'), fb, { interactive: true });
+  }
+
+  document.getElementById('fbBaseInc').addEventListener('click', () => {
+    fb.baseFret = Math.min(fb.baseFret + 1, 15);
+    rerenderBuilder();
+  });
+  document.getElementById('fbBaseDec').addEventListener('click', () => {
+    fb.baseFret = Math.max(fb.baseFret - 1, 1);
+    rerenderBuilder();
+  });
+  document.getElementById('fbClearBtn').addEventListener('click', () => {
+    fb = { frets: [0,0,0,0,0,0], fingers: {}, baseFret: 1 };
+    rerenderBuilder();
+  });
+
+  /* ---------- chords: storage ---------- */
+  async function loadChords() {
+    document.getElementById('chordList').innerHTML = '<div class="loading">loading your chords…</div>';
+    try {
+      const value = await storageGet(CHORDS_KEY);
+      chords = value || [];
+    } catch (e) { chords = []; }
+    renderChordList();
+  }
+  async function saveChordsToStorage() {
+    await storageSet(CHORDS_KEY, chords);
+  }
+
+  function statusLabel(s) { return { new: 'New', practicing: 'Practicing', learned: 'Learned' }[s] || 'New'; }
+  function nextStatus(s) { return { new: 'practicing', practicing: 'learned', learned: 'new' }[s] || 'new'; }
+
+  function renderChordList() {
+    const listEl = document.getElementById('chordList');
+    const countEl = document.getElementById('countLabel');
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const filtered = chords.filter(c => c.name.toLowerCase().includes(query)).sort((a, b) => b.createdAt - a.createdAt);
+
+    countEl.textContent = chords.length === 0 ? '' : `${filtered.length} of ${chords.length} chord${chords.length === 1 ? '' : 's'}`;
+
+    if (chords.length === 0) {
+      listEl.innerHTML = `<div class="empty-state"><div class="glyph">— · — · —</div><div>No chords yet. Add your first one above.</div></div>`;
+      return;
+    }
+    if (filtered.length === 0) {
+      listEl.innerHTML = `<div class="empty-state">No chords match "${escapeHtml(document.getElementById('searchInput').value)}"</div>`;
+      return;
+    }
+
+    listEl.innerHTML = '';
+    filtered.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="chord-name">${escapeHtml(c.name)}</div>
+          <div class="card-actions">
+            <div class="status-pill status-${c.status}" data-action="cycle-status" data-id="${c.id}">${statusLabel(c.status)}</div>
+            <button class="icon-btn" data-action="edit" data-id="${c.id}" title="Edit" aria-label="Edit chord">✎</button>
+            <button class="icon-btn danger" data-action="delete" data-id="${c.id}" title="Delete" aria-label="Delete chord">✕</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="fb-mini-slot"></div>
+          <div class="note-text ${c.note ? '' : 'empty'}">${c.note ? escapeHtml(c.note) : 'No note yet.'}</div>
+        </div>
+      `;
+      const miniSlot = card.querySelector('.fb-mini-slot');
+      renderFretboard(miniSlot, { frets: c.frets || [0,0,0,0,0,0], fingers: c.fingers || {}, baseFret: c.baseFret || 1 }, { interactive: false, mini: true });
+      listEl.appendChild(card);
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', renderChordList);
+
+  document.getElementById('chordList').addEventListener('click', async (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    const action = target.getAttribute('data-action');
+    const id = target.getAttribute('data-id');
+
+    if (action === 'cycle-status') {
+      const chord = chords.find(c => c.id === id);
+      if (chord) { chord.status = nextStatus(chord.status); await saveChordsToStorage(); renderChordList(); }
+    } else if (action === 'delete') {
+      chords = chords.filter(c => c.id !== id);
+      await saveChordsToStorage();
+      if (editingChordId === id) cancelEdit();
+      renderChordList();
+    } else if (action === 'edit') {
+      startEditChord(id);
+    }
+  });
+
+  function startEditChord(id) {
+    const chord = chords.find(c => c.id === id);
+    if (!chord) return;
+    editingChordId = id;
+    document.getElementById('chordName').value = chord.name;
+    document.getElementById('chordStatus').value = chord.status;
+    document.getElementById('chordNote').value = chord.note || '';
+    fb = {
+      frets: (chord.frets ? chord.frets.slice() : [0,0,0,0,0,0]),
+      fingers: Object.assign({}, chord.fingers || {}),
+      baseFret: chord.baseFret || 1
+    };
+    rerenderBuilder();
+    document.getElementById('editingChordLabel').textContent = chord.name;
+    document.getElementById('editingBanner').classList.add('show');
+    document.getElementById('saveChordBtn').textContent = 'Save changes';
+    document.getElementById('addForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelEdit() {
+    editingChordId = null;
+    document.getElementById('chordName').value = '';
+    document.getElementById('chordStatus').value = 'new';
+    document.getElementById('chordNote').value = '';
+    fb = { frets: [0,0,0,0,0,0], fingers: {}, baseFret: 1 };
+    rerenderBuilder();
+    document.getElementById('editingBanner').classList.remove('show');
+    document.getElementById('saveChordBtn').textContent = 'Add chord';
+  }
+  document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+
+  // Safeguard: some sandboxed environments block the native 'submit' event from
+  // ever firing on a <form>, which silently breaks buttons that rely on it. So the
+  // actual add/save logic below is triggered by a direct button click (see
+  // saveChordBtn listener), not by listening for 'submit'. This handler is just a
+  // fallback in case Enter is pressed inside a field and a submit does fire.
+  document.getElementById('addForm').addEventListener('submit', (e) => { e.preventDefault(); });
+
+  async function handleAddChord() {
+    const nameInput = document.getElementById('chordName');
+    const name = nameInput.value.trim();
+    if (!name) {
+      nameInput.style.borderColor = 'var(--danger)';
+      nameInput.focus();
+      setTimeout(() => { nameInput.style.borderColor = ''; }, 1200);
+      return;
+    }
+    const status = document.getElementById('chordStatus').value;
+    const note = document.getElementById('chordNote').value.trim();
+    const tabData = { frets: fb.frets.slice(), fingers: Object.assign({}, fb.fingers), baseFret: fb.baseFret };
+
+    if (editingChordId) {
+      const chord = chords.find(c => c.id === editingChordId);
+      if (chord) Object.assign(chord, { name, status, note }, tabData);
+    } else {
+      chords.push(Object.assign({ id: uid('c'), createdAt: Date.now() }, { name, status, note }, tabData));
+    }
+    await saveChordsToStorage();
+    cancelEdit();
+    renderChordList();
+  }
+
+  document.getElementById('saveChordBtn').addEventListener('click', handleAddChord);
+
+  /* ---------- practice log ---------- */
+  async function loadPractice() {
+    document.getElementById('practiceList').innerHTML = '<div class="loading">loading your practice log…</div>';
+    try {
+      const value = await storageGet(PRACTICE_KEY);
+      practiceEntries = value || [];
+    } catch (e) { practiceEntries = []; }
+    renderPracticeList();
+  }
+  async function savePracticeToStorage() {
+    await storageSet(PRACTICE_KEY, practiceEntries);
+  }
+
+  function formatDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function renderPracticeList() {
+    const listEl = document.getElementById('practiceList');
+    const countEl = document.getElementById('practiceCountLabel');
+    const sorted = practiceEntries.slice().sort((a, b) => (b.date + b.createdAt).localeCompare(a.date + a.createdAt));
+    countEl.textContent = practiceEntries.length === 0 ? '' : `${practiceEntries.length} entr${practiceEntries.length === 1 ? 'y' : 'ies'} logged`;
+
+    if (sorted.length === 0) {
+      listEl.innerHTML = `<div class="empty-state"><div class="glyph">— · — · —</div><div>No practice logged yet. Add today's session above.</div></div>`;
+      return;
+    }
+    listEl.innerHTML = sorted.map(p => `
+      <div class="practice-card" data-id="${p.id}">
+        <div class="practice-top">
+          <div class="practice-date">${formatDate(p.date)}</div>
+          <button class="icon-btn danger" data-action="delete-practice" data-id="${p.id}" title="Delete" aria-label="Delete entry">✕</button>
+        </div>
+        <div class="practice-text">${escapeHtml(p.text)}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('practiceList').addEventListener('click', async (e) => {
+    const target = e.target.closest('[data-action="delete-practice"]');
+    if (!target) return;
+    const id = target.getAttribute('data-id');
+    practiceEntries = practiceEntries.filter(p => p.id !== id);
+    await savePracticeToStorage();
+    renderPracticeList();
+  });
+
+  // Same safeguard as the chords form: the click handler below does the real work.
+  document.getElementById('practiceForm').addEventListener('submit', (e) => { e.preventDefault(); });
+
+  async function handleLogPractice() {
+    const dateInput = document.getElementById('practiceDate');
+    const textInput = document.getElementById('practiceText');
+    const date = dateInput.value;
+    const text = textInput.value.trim();
+    if (!date || !text) {
+      const target = !date ? dateInput : textInput;
+      target.style.borderColor = 'var(--danger)';
+      target.focus();
+      setTimeout(() => { target.style.borderColor = ''; }, 1200);
+      return;
+    }
+    practiceEntries.push({ id: uid('p'), date, text, createdAt: Date.now() });
+    textInput.value = '';
+    await savePracticeToStorage();
+    renderPracticeList();
+  }
+
+  document.getElementById('logPracticeBtn').addEventListener('click', handleLogPractice);
+
+  // default date = today
+  (function initDate() {
+    const d = new Date();
+    const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    document.getElementById('practiceDate').value = iso;
+  })();
+
+  /* ---------- 1 minute changes: timer ---------- */
+  function todayIso() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function clearOmcTimers() {
+    if (omcCountdownTimer) { clearInterval(omcCountdownTimer); omcCountdownTimer = null; }
+    if (omcRunningTimer) { clearInterval(omcRunningTimer); omcRunningTimer = null; }
+  }
+
+  function showOmcPhase(phase) {
+    document.getElementById('omcIdle').style.display = phase === 'idle' ? '' : 'none';
+    document.getElementById('omcCountdown').style.display = phase === 'countdown' ? '' : 'none';
+    document.getElementById('omcRunning').style.display = phase === 'running' ? '' : 'none';
+    document.getElementById('omcEntry').style.display = phase === 'entry' ? '' : 'none';
+  }
+
+  function resetOmcStage() {
+    clearOmcTimers();
+    showOmcPhase('idle');
+  }
+
+  function formatMMSS(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function startOmcCountdown() {
+    clearOmcTimers();
+    omcCountdownRemaining = 5;
+    document.getElementById('omcCountdownNum').textContent = omcCountdownRemaining;
+    showOmcPhase('countdown');
+    omcCountdownTimer = setInterval(() => {
+      omcCountdownRemaining -= 1;
+      if (omcCountdownRemaining <= 0) {
+        clearInterval(omcCountdownTimer);
+        omcCountdownTimer = null;
+        startOmcRunning();
+      } else {
+        document.getElementById('omcCountdownNum').textContent = omcCountdownRemaining;
+      }
+    }, 1000);
+  }
+
+  function startOmcRunning() {
+    clearOmcTimers();
+    omcRunningRemaining = 60;
+    const numEl = document.getElementById('omcRunningNum');
+    numEl.classList.remove('is-urgent');
+    numEl.textContent = formatMMSS(omcRunningRemaining);
+    showOmcPhase('running');
+    omcRunningTimer = setInterval(() => {
+      omcRunningRemaining -= 1;
+      if (omcRunningRemaining <= 0) {
+        clearInterval(omcRunningTimer);
+        omcRunningTimer = null;
+        numEl.textContent = '0:00';
+        showOmcEntry();
+      } else {
+        numEl.textContent = formatMMSS(omcRunningRemaining);
+        if (omcRunningRemaining <= 10) numEl.classList.add('is-urgent');
+      }
+    }, 1000);
+  }
+
+  function showOmcEntry() {
+    showOmcPhase('entry');
+    const chordsInput = document.getElementById('omcChords');
+    const changesInput = document.getElementById('omcChanges');
+    chordsInput.value = '';
+    changesInput.value = '';
+    chordsInput.classList.remove('omc-field-error');
+    changesInput.classList.remove('omc-field-error');
+    document.getElementById('omcDate').value = todayIso();
+    setTimeout(() => chordsInput.focus(), 50);
+  }
+
+  document.getElementById('omcStartBtn').addEventListener('click', startOmcCountdown);
+  document.getElementById('omcCancelBtn1').addEventListener('click', resetOmcStage);
+  document.getElementById('omcCancelBtn2').addEventListener('click', resetOmcStage);
+  document.getElementById('omcDiscardBtn').addEventListener('click', resetOmcStage);
+
+  /* ---------- 1 minute changes: chord key normalization ---------- */
+  // "A,D" and "D,A" should be treated as the same leaderboard entry. Split on
+  // commas, trim, capitalize, then sort alphanumerically so both inputs collapse
+  // to the same key (e.g. "A, D").
+  function normalizeChordsTokens(raw) {
+    return raw.split(',')
+      .map(t => t.trim())
+      .filter(Boolean)
+      .map(t => t.charAt(0).toUpperCase() + t.slice(1))
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
+  }
+
+  // The stored/grouping key stays comma-joined (e.g. "A, D") so lookups and the
+  // open/closed Set stay stable; only the leaderboard label is shown as "A->D".
+  function formatChordsDisplay(key) {
+    return key.split(', ').join(' ↔ ');
+  }
+
+  /* ---------- 1 minute changes: storage ---------- */
+  async function loadOmcAttempts() {
+    document.getElementById('omcLeaderboard').innerHTML = '<div class="loading">loading your leaderboard…</div>';
+    try {
+      const value = await storageGet(OMC_KEY);
+      omcAttempts = value || [];
+    } catch (e) { omcAttempts = []; }
+    renderOmcLeaderboard();
+  }
+  async function saveOmcAttemptsToStorage() {
+    await storageSet(OMC_KEY, omcAttempts);
+  }
+
+  async function handleSaveOmcEntry() {
+    const chordsInput = document.getElementById('omcChords');
+    const changesInput = document.getElementById('omcChanges');
+    const dateInput = document.getElementById('omcDate');
+
+    chordsInput.classList.remove('omc-field-error');
+    changesInput.classList.remove('omc-field-error');
+
+    const tokens = normalizeChordsTokens(chordsInput.value);
+    if (tokens.length < 2) {
+      chordsInput.classList.add('omc-field-error');
+      chordsInput.focus();
+      return;
+    }
+    const changesRaw = changesInput.value.trim();
+    if (!/^\d+$/.test(changesRaw)) {
+      changesInput.classList.add('omc-field-error');
+      changesInput.focus();
+      return;
+    }
+    const date = dateInput.value || todayIso();
+
+    omcAttempts.push({
+      id: uid('omc'),
+      chordsKey: tokens.join(', '),
+      changes: parseInt(changesRaw, 10),
+      date,
+      createdAt: Date.now()
+    });
+    await saveOmcAttemptsToStorage();
+    resetOmcStage();
+    renderOmcLeaderboard();
+  }
+
+  document.getElementById('omcSaveBtn').addEventListener('click', handleSaveOmcEntry);
+
+  /* ---------- 1 minute changes: leaderboard ---------- */
+  function renderOmcLeaderboard() {
+    const container = document.getElementById('omcLeaderboard');
+    const countEl = document.getElementById('omcLeaderboardCount');
+
+    if (omcAttempts.length === 0) {
+      countEl.textContent = '';
+      container.innerHTML = `<div class="empty-state"><div class="glyph">— · — · —</div><div>No sets logged yet. Press Start above to log your first one.</div></div>`;
+      return;
+    }
+
+    const groups = {};
+    omcAttempts.forEach(a => {
+      if (!groups[a.chordsKey]) groups[a.chordsKey] = [];
+      groups[a.chordsKey].push(a);
+    });
+
+    const rows = Object.keys(groups).map(key => {
+      const attempts = groups[key];
+      const best = Math.max(...attempts.map(a => a.changes));
+      return { key, attempts, best };
+    });
+    // Highest changes value floats to the top of the leaderboard; ties break alphabetically.
+    rows.sort((a, b) => b.best - a.best || a.key.localeCompare(b.key));
+
+    countEl.textContent = `${rows.length} chord pair${rows.length === 1 ? '' : 's'} · ${omcAttempts.length} set${omcAttempts.length === 1 ? '' : 's'} logged`;
+
+    container.innerHTML = '';
+    rows.forEach((row, idx) => {
+      const isOpen = omcOpenKeys.has(row.key);
+      const wrap = document.createElement('div');
+      wrap.className = 'omc-lb-row' + (isOpen ? ' open' : '');
+      wrap.innerHTML = `
+        <div class="omc-lb-row-top" data-action="toggle-omc" data-key="${escapeHtml(row.key)}">
+          <span class="omc-lb-rank">${idx + 1}</span>
+          <span class="omc-lb-chord">${escapeHtml(formatChordsDisplay(row.key))}</span>
+          <span class="omc-lb-count">${row.attempts.length} attempt${row.attempts.length === 1 ? '' : 's'}</span>
+          <span class="omc-lb-best">${row.best}<span class="omc-lb-best-label">best</span></span>
+          <span class="omc-lb-chevron">▾</span>
+        </div>
+        <div class="omc-lb-detail"></div>
+      `;
+      const detail = wrap.querySelector('.omc-lb-detail');
+      const sortedAttempts = row.attempts.slice().sort((a, b) => {
+        if (a.date !== b.date) return a.date < b.date ? 1 : -1; // newest date first
+        return b.createdAt - a.createdAt;
+      });
+      detail.innerHTML = sortedAttempts.map(a => `
+        <div class="omc-attempt">
+          <span class="omc-attempt-date">${formatDate(a.date)}</span>
+          <span class="omc-attempt-changes">${a.changes}</span>
+          ${a.changes === row.best ? '<span class="omc-pb-tag">PB</span>' : ''}
+          <button class="icon-btn danger" data-action="delete-omc" data-id="${a.id}" title="Delete" aria-label="Delete attempt">✕</button>
+        </div>
+      `).join('');
+      container.appendChild(wrap);
+    });
+  }
+
+  document.getElementById('omcLeaderboard').addEventListener('click', async (e) => {
+    const deleteTarget = e.target.closest('[data-action="delete-omc"]');
+    if (deleteTarget) {
+      const id = deleteTarget.getAttribute('data-id');
+      omcAttempts = omcAttempts.filter(a => a.id !== id);
+      await saveOmcAttemptsToStorage();
+      renderOmcLeaderboard();
+      return;
+    }
+    const toggleTarget = e.target.closest('[data-action="toggle-omc"]');
+    if (toggleTarget) {
+      const key = toggleTarget.getAttribute('data-key');
+      if (omcOpenKeys.has(key)) omcOpenKeys.delete(key); else omcOpenKeys.add(key);
+      renderOmcLeaderboard();
+    }
+  });
+
+  /* ---------- perfect changes: timer (mirrors 1 minute changes) ---------- */
+  function clearPcTimers() {
+    if (pcCountdownTimer) { clearInterval(pcCountdownTimer); pcCountdownTimer = null; }
+    if (pcRunningTimer) { clearInterval(pcRunningTimer); pcRunningTimer = null; }
+  }
+
+  function showPcPhase(phase) {
+    document.getElementById('pcIdle').style.display = phase === 'idle' ? '' : 'none';
+    document.getElementById('pcCountdown').style.display = phase === 'countdown' ? '' : 'none';
+    document.getElementById('pcRunning').style.display = phase === 'running' ? '' : 'none';
+    document.getElementById('pcEntry').style.display = phase === 'entry' ? '' : 'none';
+  }
+
+  function resetPcStage() {
+    clearPcTimers();
+    showPcPhase('idle');
+  }
+
+  function startPcCountdown() {
+    clearPcTimers();
+    pcCountdownRemaining = 5;
+    document.getElementById('pcCountdownNum').textContent = pcCountdownRemaining;
+    showPcPhase('countdown');
+    pcCountdownTimer = setInterval(() => {
+      pcCountdownRemaining -= 1;
+      if (pcCountdownRemaining <= 0) {
+        clearInterval(pcCountdownTimer);
+        pcCountdownTimer = null;
+        startPcRunning();
+      } else {
+        document.getElementById('pcCountdownNum').textContent = pcCountdownRemaining;
+      }
+    }, 1000);
+  }
+
+  function startPcRunning() {
+    clearPcTimers();
+    pcRunningRemaining = 60;
+    const numEl = document.getElementById('pcRunningNum');
+    numEl.classList.remove('is-urgent');
+    numEl.textContent = formatMMSS(pcRunningRemaining);
+    showPcPhase('running');
+    pcRunningTimer = setInterval(() => {
+      pcRunningRemaining -= 1;
+      if (pcRunningRemaining <= 0) {
+        clearInterval(pcRunningTimer);
+        pcRunningTimer = null;
+        numEl.textContent = '0:00';
+        showPcEntry();
+      } else {
+        numEl.textContent = formatMMSS(pcRunningRemaining);
+        if (pcRunningRemaining <= 10) numEl.classList.add('is-urgent');
+      }
+    }, 1000);
+  }
+
+  function showPcEntry() {
+    showPcPhase('entry');
+    const chordsInput = document.getElementById('pcChords');
+    const changesInput = document.getElementById('pcChanges');
+    chordsInput.value = '';
+    changesInput.value = '';
+    chordsInput.classList.remove('omc-field-error');
+    changesInput.classList.remove('omc-field-error');
+    document.getElementById('pcDate').value = todayIso();
+    setTimeout(() => chordsInput.focus(), 50);
+  }
+
+  document.getElementById('pcStartBtn').addEventListener('click', startPcCountdown);
+  document.getElementById('pcCancelBtn1').addEventListener('click', resetPcStage);
+  document.getElementById('pcCancelBtn2').addEventListener('click', resetPcStage);
+  document.getElementById('pcDiscardBtn').addEventListener('click', resetPcStage);
+
+  /* ---------- perfect changes: storage ---------- */
+  async function loadPcAttempts() {
+    document.getElementById('pcLeaderboard').innerHTML = '<div class="loading">loading your leaderboard…</div>';
+    try {
+      const value = await storageGet(PC_KEY);
+      pcAttempts = value || [];
+    } catch (e) { pcAttempts = []; }
+    renderPcLeaderboard();
+  }
+  async function savePcAttemptsToStorage() {
+    await storageSet(PC_KEY, pcAttempts);
+  }
+
+  async function handleSavePcEntry() {
+    const chordsInput = document.getElementById('pcChords');
+    const changesInput = document.getElementById('pcChanges');
+    const dateInput = document.getElementById('pcDate');
+
+    chordsInput.classList.remove('omc-field-error');
+    changesInput.classList.remove('omc-field-error');
+
+    const tokens = normalizeChordsTokens(chordsInput.value);
+    if (tokens.length < 2) {
+      chordsInput.classList.add('omc-field-error');
+      chordsInput.focus();
+      return;
+    }
+    const changesRaw = changesInput.value.trim();
+    if (!/^\d+$/.test(changesRaw)) {
+      changesInput.classList.add('omc-field-error');
+      changesInput.focus();
+      return;
+    }
+    const date = dateInput.value || todayIso();
+
+    pcAttempts.push({
+      id: uid('pc'),
+      chordsKey: tokens.join(', '),
+      changes: parseInt(changesRaw, 10),
+      date,
+      createdAt: Date.now()
+    });
+    await savePcAttemptsToStorage();
+    resetPcStage();
+    renderPcLeaderboard();
+  }
+
+  document.getElementById('pcSaveBtn').addEventListener('click', handleSavePcEntry);
+
+  /* ---------- perfect changes: leaderboard ---------- */
+  function renderPcLeaderboard() {
+    const container = document.getElementById('pcLeaderboard');
+    const countEl = document.getElementById('pcLeaderboardCount');
+
+    if (pcAttempts.length === 0) {
+      countEl.textContent = '';
+      container.innerHTML = `<div class="empty-state"><div class="glyph">— · — · —</div><div>No sets logged yet. Press Start above to log your first one.</div></div>`;
+      return;
+    }
+
+    const groups = {};
+    pcAttempts.forEach(a => {
+      if (!groups[a.chordsKey]) groups[a.chordsKey] = [];
+      groups[a.chordsKey].push(a);
+    });
+
+    const rows = Object.keys(groups).map(key => {
+      const attempts = groups[key];
+      const best = Math.max(...attempts.map(a => a.changes));
+      return { key, attempts, best };
+    });
+    rows.sort((a, b) => b.best - a.best || a.key.localeCompare(b.key));
+
+    countEl.textContent = `${rows.length} chord pair${rows.length === 1 ? '' : 's'} · ${pcAttempts.length} set${pcAttempts.length === 1 ? '' : 's'} logged`;
+
+    container.innerHTML = '';
+    rows.forEach((row, idx) => {
+      const isOpen = pcOpenKeys.has(row.key);
+      const wrap = document.createElement('div');
+      wrap.className = 'omc-lb-row' + (isOpen ? ' open' : '');
+      wrap.innerHTML = `
+        <div class="omc-lb-row-top" data-action="toggle-pc" data-key="${escapeHtml(row.key)}">
+          <span class="omc-lb-rank">${idx + 1}</span>
+          <span class="omc-lb-chord">${escapeHtml(formatChordsDisplay(row.key))}</span>
+          <span class="omc-lb-count">${row.attempts.length} attempt${row.attempts.length === 1 ? '' : 's'}</span>
+          <span class="omc-lb-best">${row.best}<span class="omc-lb-best-label">best</span></span>
+          <span class="omc-lb-chevron">▾</span>
+        </div>
+        <div class="omc-lb-detail"></div>
+      `;
+      const detail = wrap.querySelector('.omc-lb-detail');
+      const sortedAttempts = row.attempts.slice().sort((a, b) => {
+        if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+        return b.createdAt - a.createdAt;
+      });
+      detail.innerHTML = sortedAttempts.map(a => `
+        <div class="omc-attempt">
+          <span class="omc-attempt-date">${formatDate(a.date)}</span>
+          <span class="omc-attempt-changes">${a.changes}</span>
+          ${a.changes === row.best ? '<span class="omc-pb-tag">PB</span>' : ''}
+          <button class="icon-btn danger" data-action="delete-pc" data-id="${a.id}" title="Delete" aria-label="Delete attempt">✕</button>
+        </div>
+      `).join('');
+      container.appendChild(wrap);
+    });
+  }
+
+  document.getElementById('pcLeaderboard').addEventListener('click', async (e) => {
+    const deleteTarget = e.target.closest('[data-action="delete-pc"]');
+    if (deleteTarget) {
+      const id = deleteTarget.getAttribute('data-id');
+      pcAttempts = pcAttempts.filter(a => a.id !== id);
+      await savePcAttemptsToStorage();
+      renderPcLeaderboard();
+      return;
+    }
+    const toggleTarget = e.target.closest('[data-action="toggle-pc"]');
+    if (toggleTarget) {
+      const key = toggleTarget.getAttribute('data-key');
+      if (pcOpenKeys.has(key)) pcOpenKeys.delete(key); else pcOpenKeys.add(key);
+      renderPcLeaderboard();
+    }
+  });
+
+  /* ---------- init ---------- */
+  rerenderBuilder();
+  loadChords();
+  loadPractice();
+  loadOmcAttempts();
+  loadPcAttempts();
+})();
+</script>
+</body>
+</html>
